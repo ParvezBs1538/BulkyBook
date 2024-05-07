@@ -95,7 +95,6 @@ namespace BulkyBookWeb.Controllers
             return View(item);
         }
         // post
-        [HttpPost]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public IActionResult DeletePost(int? id)
