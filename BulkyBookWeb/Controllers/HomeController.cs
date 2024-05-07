@@ -15,6 +15,8 @@ namespace BulkyBookWeb.Controllers
 
         public IActionResult Index()
         {
+            //return Json("Hello, Brain Station");
+            //return Content("Just return a plain text");
             return View();
         }
 
@@ -30,4 +32,3 @@ namespace BulkyBookWeb.Controllers
         }
     }
 }
- 

@@ -14,7 +14,7 @@ namespace BulkyBookWeb.Controllers
         public IActionResult Index()
         {
             //var item = context.Categories.ToList();
-            IEnumerable<Category> item = context.Categories.ToList();
+            IEnumerable<Category> item = context.Categories.ToList();  // IEnumerable-> represents a sequence of elements
             return View(item);
         } 
     }
