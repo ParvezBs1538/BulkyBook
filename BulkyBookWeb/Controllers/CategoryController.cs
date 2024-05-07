@@ -1,6 +1,7 @@
 ﻿using BulkyBookWeb.Data;
 using BulkyBookWeb.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BulkyBookWeb.Controllers
 {
@@ -11,12 +12,25 @@ namespace BulkyBookWeb.Controllers
         {
             this.context = context;
         }
-        public IActionResult Index()
+        public IActionResult Index(string search)
         {
-            //var item = context.Categories.ToList();
-            IEnumerable<Category> item = context.Categories.ToList();  // IEnumerable-> represents a sequence of elements
+            var item = context.Categories.ToList(); 
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                item = item.Where(c => c.Name.Contains(search)).ToList();
+            }
+
             return View(item);
         }
+
+        //public IActionResult Index()
+        //{
+        //    //var item = context.Categories.ToList();
+        //    IEnumerable<Category> item = context.Categories.OrderBy(x => x.DisplayOrder).ToList();  // IEnumerable-> represents a sequence of elements
+
+        //    return View(item);
+        //}
         // Get
         [HttpGet]
         public IActionResult Create()
