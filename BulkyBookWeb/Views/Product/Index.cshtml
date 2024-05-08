@@ -1,25 +1,24 @@
-﻿@* @model IEnumerable<Category>  *@
-@model IEnumerable<BulkyBookWeb.Models.Category>
+﻿@model IEnumerable<BulkyBookWeb.Models.Product>
 @{
-    ViewData["Title"] = "Index";
+    int Total = 0;
 }
 <div class="col-6">
-    <h2 class="text-primary">Category List</h2>
- </div>
+    <h2 class="text-primary">Product Order List</h2>
+</div>
 
 <div class="container p-3">
 
     <div class="row pt-4">
-        
-        <div class="col-4">
-            <form asp-controller="Category" asp-action="Index" method="get">
+
+        <div class="col-6">
+            <form asp-controller="Product" asp-action="Index" method="get">
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" placeholder="Search by Category Name" name="search">
                     <button class="btn btn-outline-primary" type="submit">Search</button>
                 </div>
 
-                <a asp-controller="Category" asp-action="Create" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> &nbsp; Create New Category
+                <a asp-controller="Product" asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> &nbsp; Create New Product
                 </a>
 
             </form>
@@ -30,7 +29,7 @@
     @if (!Model.Any())
     {
         <div class="alert alert-info" role="alert">
-            No categories found.
+            No Product found.
         </div>
     }
     else
@@ -38,29 +37,34 @@
         <table class="table table-border table-striped" style="width:100%">
             <thead>
                 <tr>
-                    <th>Category Name</th>
-                    <th>Display Order</th>
-                    <th>CreateTime</th>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var obj in Model)
                 {
+                    Total += (obj.Quantity * obj.Price);
                     <tr>
                         <td width="30%">
                             @obj.Name
                         </td>
                         <td width="30%">
-                            @obj.DisplayOrder
+                            @obj.Quantity
                         </td>
                         <td width="30%">
-                            @obj.CreatedDateTime
+                            @obj.Price
+                        </td>
+                        <td width="30%">
+                            @(obj.Price * obj.Quantity)
                         </td>
                         <td>
                             <div class="w-75 btn-group" role="group">
-                                <a asp-controller="Category" asp-action="Edit" asp-route-id="@obj.Id"class="btn btn-primary mx-2"> <i class="bi bi-pencil-square"></i> Edit</a>
-                                <a asp-controller="Category" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-warning mx-2"> <i class="bi bi-trash-fill"></i> Delete</a>
+                                <a asp-controller="Product" asp-action="Edit" asp-route-id="@obj.Id" class="btn btn-primary mx-2"> <i class="bi bi-pencil-square"></i> Edit</a>
+                                <a asp-controller="Product" asp-action="Delete" asp-route-id="@obj.Id" class="btn btn-danger mx-2"> <i class="bi bi-trash-fill"></i> Delete</a>
                             </div>
                         </td>
                     </tr>
@@ -68,4 +72,7 @@
             </tbody>
         </table>
     }
+</div>
+<div>
+    <b style="color:black; background: cyan">Total Price : @Total Take</b>
 </div>
