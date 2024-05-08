@@ -12,13 +12,14 @@ namespace BulkyBookWeb.Controllers
         {
             this.context = context;
         }
+
         public IActionResult Index(string search)
         {
-            var item = context.Categories.ToList(); 
+            var item = context.Categories.OrderBy(x => x.DisplayOrder).ToList();
 
             if (!string.IsNullOrEmpty(search))
             {
-                item = item.Where(c => c.Name.Contains(search)).ToList();
+                item = item.Where(c => c.Name.Contains(search)).OrderBy(x => x.DisplayOrder).ToList();
             }
 
             return View(item);
@@ -26,11 +27,12 @@ namespace BulkyBookWeb.Controllers
 
         //public IActionResult Index()
         //{
-        //    //var item = context.Categories.ToList();
+        //    var item = context.Categories.ToList();
         //    IEnumerable<Category> item = context.Categories.OrderBy(x => x.DisplayOrder).ToList();  // IEnumerable-> represents a sequence of elements
 
         //    return View(item);
         //}
+
         // Get
         [HttpGet]
         public IActionResult Create()
