@@ -95,6 +95,16 @@ namespace BulkyBookWeb.Controllers
 			return View(obj);
 		}
 
+        public IActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var item = context.Categories.Find(id);
+            return View(item);
+        }
+
         // Get
         [HttpGet]
         public IActionResult Delete(int? id)
