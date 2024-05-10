@@ -45,14 +45,15 @@ namespace BulkyBookWeb.Controllers
         //    return View(item);
         //}
 
-        // Get
+        #region get create
         [HttpGet]
         public async Task<IActionResult> Create()
         {
             return View();
         }
+        #endregion
 
-        // post
+        #region post create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Category category)
@@ -70,83 +71,107 @@ namespace BulkyBookWeb.Controllers
 
 			return View(category);
 		}
+        #endregion
 
-		// Get
-		//[HttpGet]
-		//public IActionResult Edit(int? id)
-		//{
-  //          if (id == null || id == 0)
-		//	{
-		//		return NotFound();
-		//	}
-		//	//var item = context.Categories.Single(x => x.Id == id); // if no element found return exception
-		//	//var item = context.Categories.SingleOrDefault(x => x.Id == id); // if no element found return empty (it throw exception if more than element found)
-		//	//var item = context.Categories.FirstOrDefault(x => x.Id == id); // if found more than one then return first element
-		//	var item = context.Categories.Find(id);
-		//	if (item == null)
-		//	{
-		//		return NotFound();
-		//	}
-  //          return View(item);
-		//}
-		//// post
-		//[HttpPost]
-		//[ValidateAntiForgeryToken]
-		//public IActionResult Edit(Category obj)
-		//{
-		//	if (obj.Name == obj.DisplayOrder.ToString())
-		//	{
-		//		ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
-		//	}
-		//	if (ModelState.IsValid)
-		//	{
-		//		context.Categories.Update(obj);
-		//		context.SaveChanges();
-		//		TempData["success"] = "Category Updated successfully";
-		//		return RedirectToAction("Index");
-		//	}
-		//	return View(obj);
-		//}
+        #region get edit
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            Category category = new Category();
+            try
+            {
+                if (id == 0)
+                {
+                    return BadRequest();
+                }
+                else
+                {
+                    category = await CategoryRepo.GetCategoryById(id);
+                    if (category == null)
+                    {
+                        return NotFound();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return View(category);
+        }
+        #endregion
 
-  //      public IActionResult Details(int? id)
-  //      {
-  //          if (id == null)
-  //          {
-  //              return NotFound();
-  //          }
-  //          var item = context.Categories.Find(id);
-  //          return View(item);
-  //      }
+        #region post edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Category category)
+        {
+            if (category.Name == category.DisplayOrder.ToString())
+            {
+                ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
+            }
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(category);
+                }
+                else
+                {
+                    bool status = await CategoryRepo.UpdateRecord(category);
+                    if (status)
+                    {
+                        TempData["success"] = "Category Updated successfully";
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return RedirectToAction("Index");
+        }
+        #endregion
 
-  //      // Get
-  //      [HttpGet]
-  //      public IActionResult Delete(int? id)
-  //      {
-  //          if (id == null || id == 0)
-  //          {
-  //              return NotFound();
-  //          }
-  //          var item = context.Categories.Find(id);
-  //          if (item == null)
-  //          {
-  //              return NotFound();
-  //          }
-  //          return View(item);
-  //      }
-  //      // post
-  //      [HttpPost, ActionName("Delete")]
-  //      [ValidateAntiForgeryToken]
-  //      public IActionResult DeletePost(int? id)
-  //      {
-  //          var item = context.Categories.Find(id);
-  //          if (item == null)
-  //          {
-  //              return NotFound();
-  //          }
-  //          context.Categories.Remove(item);
-  //          context.SaveChanges();
-  //          TempData["success"] = "Category Delete successfully";
-  //          return RedirectToAction("Index");
-  //      }
+        //public IActionResult Details(int? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    var item = context.Categories.Find(id);
+        //    return View(item);
+        //}
+
+        //      // Get
+        //      [HttpGet]
+        //      public IActionResult Delete(int? id)
+        //      {
+        //          if (id == null || id == 0)
+        //          {
+        //              return NotFound();
+        //          }
+        //          var item = context.Categories.Find(id);
+        //          if (item == null)
+        //          {
+        //              return NotFound();
+        //          }
+        //          return View(item);
+        //      }
+        //      // post
+        //      [HttpPost, ActionName("Delete")]
+        //      [ValidateAntiForgeryToken]
+        //      public IActionResult DeletePost(int? id)
+        //      {
+        //          var item = context.Categories.Find(id);
+        //          if (item == null)
+        //          {
+        //              return NotFound();
+        //          }
+        //          context.Categories.Remove(item);
+        //          context.SaveChanges();
+        //          TempData["success"] = "Category Delete successfully";
+        //          return RedirectToAction("Index");
+        //      }
     }
 }

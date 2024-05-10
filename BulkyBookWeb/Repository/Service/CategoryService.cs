@@ -13,35 +13,54 @@ namespace BulkyBookWeb.Repository.Service
             this.context = context;
         }
 
+        #region GetCategoryById
+        public async Task<Category> GetCategoryById(int id)
+        {
+            var data = await context.Categories.FindAsync(id);
+            return data;
+        }
+        #endregion
+
+        #region GetCategory
         public async Task<IEnumerable<Category>> GetCategory()
         {
             var data = await context.Categories.ToListAsync();
             return data;
         }
+        #endregion
 
+        #region AddCategory
         public async Task<int> AddCategory(Category category)
         {
             await context.Categories.AddAsync(category);
             await context.SaveChangesAsync();
             return category.Id;
         }
+        #endregion
+
+        #region GetDetails
+        public async Task<Category> GetDetails(int id)
+        {
+            var item = await GetCategoryById(id);
+            return item;
+        }
+        #endregion
+
+        #region UpdateRecord
+        public async Task<bool> UpdateRecord(Category category)
+        {
+            bool status = false;
+            if (category != null)
+            {
+                context.Categories.Update(category);
+                await context.SaveChangesAsync();
+                status = true;
+            }
+            return status;
+        }
+        #endregion
 
         public Task<bool> DeleteRecord(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Category> GetDetails(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Category> GetUserById(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdateRecord(Category category)
         {
             throw new NotImplementedException();
         }
