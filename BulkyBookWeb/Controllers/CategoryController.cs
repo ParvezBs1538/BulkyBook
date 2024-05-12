@@ -1,5 +1,6 @@
 ﻿using BulkyBookWeb.Data;
 using BulkyBookWeb.Models;
+using BulkyBookWeb.Repository.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,23 +8,34 @@ namespace BulkyBookWeb.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly ApplicationDbContext context;
-        public CategoryController(ApplicationDbContext context)
+        private readonly ICategory CategoryRepo;
+        public CategoryController(ICategory CategoryRepo)
         {
-            this.context = context;
+            this.CategoryRepo = CategoryRepo;
         }
 
-        public IActionResult Index(string search)
+        #region repo index
+        public async Task<IActionResult> Index()
         {
-            var item = context.Categories.OrderBy(x => x.DisplayOrder).ToList();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                item = item.Where(c => c.Name.Contains(search)).OrderBy(x => x.DisplayOrder).ToList();
-            }
-
-            return View(item);
+            var data = await CategoryRepo.GetCategory();
+            return View(data);
         }
+        #endregion
+
+        #region search by name
+        //public IActionResult Index(string search)
+        //{
+        //    var item = context.Categories.OrderBy(x => x.DisplayOrder).ToList();
+
+        //    if (!string.IsNullOrEmpty(search))
+        //    {
+        //        item = item.Where(c => c.Name.Contains(search)).OrderBy(x => x.DisplayOrder).ToList();
+        //    }
+
+        //    return View(item);
+        //}
+        #endregion
+
 
         //public IActionResult Index()
         //{
@@ -33,106 +45,153 @@ namespace BulkyBookWeb.Controllers
         //    return View(item);
         //}
 
-        // Get
+        #region get create
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             return View();
         }
-        // post
+        #endregion
+
+        #region post create
         [HttpPost]
         [ValidateAntiForgeryToken]
-		public IActionResult Create(Category obj)
-		{
-            if (obj.Name == obj.DisplayOrder.ToString())
+        public async Task<IActionResult> Create(Category category)
+        {
+            if (category.Name == category.DisplayOrder.ToString())
             {
                 ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
             }
             if (ModelState.IsValid)
 			{
-				context.Categories.Add(obj);
-				context.SaveChanges();
-				TempData["success"] = "Category created successfully";
-				return RedirectToAction("Index");
-			}
-			return View(obj);
-		}
+                await CategoryRepo.AddCategory(category);
+                TempData["success"] = "Category created successfully";
+                return RedirectToAction("Index");
+            }
 
-		// Get
-		[HttpGet]
-		public IActionResult Edit(int? id)
-		{
-            if (id == null || id == 0)
-			{
-				return NotFound();
-			}
-			//var item = context.Categories.Single(x => x.Id == id); // if no element found return exception
-			//var item = context.Categories.SingleOrDefault(x => x.Id == id); // if no element found return empty (it throw exception if more than element found)
-			//var item = context.Categories.FirstOrDefault(x => x.Id == id); // if found more than one then return first element
-			var item = context.Categories.Find(id);
-			if (item == null)
-			{
-				return NotFound();
-			}
-            return View(item);
+			return View(category);
 		}
-		// post
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public IActionResult Edit(Category obj)
-		{
-			if (obj.Name == obj.DisplayOrder.ToString())
-			{
-				ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
-			}
-			if (ModelState.IsValid)
-			{
-				context.Categories.Update(obj);
-				context.SaveChanges();
-				TempData["success"] = "Category Updated successfully";
-				return RedirectToAction("Index");
-			}
-			return View(obj);
-		}
+        #endregion
 
-        public IActionResult Details(int? id)
+        #region get edit
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            Category category = new Category();
+            try
+            {
+                if (id == 0)
+                {
+                    return BadRequest();
+                }
+                else
+                {
+                    category = await CategoryRepo.GetCategoryById(id);
+                    if (category == null)
+                    {
+                        return NotFound();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return View(category);
+        }
+        #endregion
+
+        #region post edit
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Category category)
+        {
+            if (category.Name == category.DisplayOrder.ToString())
+            {
+                ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
+            }
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return View(category);
+                }
+                else
+                {
+                    bool status = await CategoryRepo.UpdateRecord(category);
+                    if (status)
+                    {
+                        TempData["success"] = "Category Updated successfully";
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return RedirectToAction("Index");
+        }
+        #endregion
+
+        #region details
+        public async Task<IActionResult> Details(int id)
         {
             if (id == null)
             {
                 return NotFound();
             }
-            var item = context.Categories.Find(id);
+            var item = await CategoryRepo.GetCategoryById(id);
+
             return View(item);
         }
+        #endregion
 
-        // Get
+        #region get delete
         [HttpGet]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (id == null || id == 0)
+            if (id == 0)
             {
                 return NotFound();
             }
-            var item = context.Categories.Find(id);
+            var item = await CategoryRepo.GetCategoryById(id);
             if (item == null)
             {
                 return NotFound();
             }
+
             return View(item);
         }
-        // post
+        #endregion
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeletePost(int? id)
+        public async Task<IActionResult> DeleteRecord(int id)
         {
-            var item = context.Categories.Find(id);
-            if (item == null)
+            try
             {
-                return NotFound();
+                if (id == 0)
+                {
+                    return BadRequest();
+                }
+                else
+                {
+                    bool status = await CategoryRepo.DeleteRecord(id);
+                    if (status)
+                    {
+                        TempData["userSuccess"] = "Record successfully deleted";
+                    }
+                    else
+                    {
+                        TempData["userError"] = "Record not delete";
+                    }
+                }
             }
-            context.Categories.Remove(item);
-            context.SaveChanges();
-            TempData["success"] = "Category Delete successfully";
+            catch (Exception ex)
+            {
+                throw;
+            }
+
             return RedirectToAction("Index");
         }
     }

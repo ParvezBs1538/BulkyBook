@@ -1,6 +1,9 @@
 
 using BulkyBookWeb.Data;
+using BulkyBookWeb.Repository.Interface;
+using BulkyBookWeb.Repository.Service;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,9 +12,11 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaultConnection")
-    ));
+));
 
-builder.Services.AddRazorPages().AddRazorRuntimeCompilation();
+builder.Services.AddScoped<ICategory, CategoryService>();
+
+//ilder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
 var app = builder.Build();
 
