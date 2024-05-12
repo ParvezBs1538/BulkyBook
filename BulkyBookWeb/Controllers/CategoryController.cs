@@ -15,9 +15,14 @@ namespace BulkyBookWeb.Controllers
         }
 
         #region repo index
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search)
         {
             var data = await CategoryRepo.GetCategory();
+            if (!string.IsNullOrEmpty(search))
+            {
+                //data = data.Where(x => x.Name == search).OrderBy(x => x.DisplayOrder).ToList();
+                data = data.Where(x => x.Name.Contains(search)).OrderBy(x => x.DisplayOrder).ToList();
+            }
             return View(data);
         }
         #endregion
