@@ -24,7 +24,7 @@ namespace BulkyBookWeb.Repository.Service
         #region GetCategory
         public async Task<IEnumerable<Category>> GetCategory()
         {
-            var data = await context.Categories.ToListAsync();
+            var data = await context.Categories.OrderBy(x => x.DisplayOrder).ToListAsync();
             return data;
         }
         #endregion
