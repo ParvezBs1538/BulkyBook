@@ -38,13 +38,6 @@ namespace BulkyBookWeb.Repository.Service
         }
         #endregion
 
-        #region GetDetails
-        public async Task<Category> GetDetails(int id)
-        {
-            var item = await GetCategoryById(id);
-            return item;
-        }
-        #endregion
 
         #region UpdateRecord
         public async Task<bool> UpdateRecord(Category category)
@@ -60,9 +53,20 @@ namespace BulkyBookWeb.Repository.Service
         }
         #endregion
 
-        public Task<bool> DeleteRecord(int id)
+        public async Task<bool> DeleteRecord(int id)
         {
-            throw new NotImplementedException();
+            bool status = false;
+            if (id != 0)
+            {
+                var data = await GetCategoryById(id);
+                if (data != null)
+                {
+                    context.Categories.Remove(data);
+                    await context.SaveChangesAsync();
+                    status = true;
+                }
+            }
+            return status;
         }
     }
 }

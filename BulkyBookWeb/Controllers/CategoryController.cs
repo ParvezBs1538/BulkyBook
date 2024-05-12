@@ -133,45 +133,66 @@ namespace BulkyBookWeb.Controllers
         }
         #endregion
 
-        //public IActionResult Details(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var item = context.Categories.Find(id);
-        //    return View(item);
-        //}
+        #region details
+        public async Task<IActionResult> Details(int id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var item = await CategoryRepo.GetCategoryById(id);
 
-        //      // Get
-        //      [HttpGet]
-        //      public IActionResult Delete(int? id)
-        //      {
-        //          if (id == null || id == 0)
-        //          {
-        //              return NotFound();
-        //          }
-        //          var item = context.Categories.Find(id);
-        //          if (item == null)
-        //          {
-        //              return NotFound();
-        //          }
-        //          return View(item);
-        //      }
-        //      // post
-        //      [HttpPost, ActionName("Delete")]
-        //      [ValidateAntiForgeryToken]
-        //      public IActionResult DeletePost(int? id)
-        //      {
-        //          var item = context.Categories.Find(id);
-        //          if (item == null)
-        //          {
-        //              return NotFound();
-        //          }
-        //          context.Categories.Remove(item);
-        //          context.SaveChanges();
-        //          TempData["success"] = "Category Delete successfully";
-        //          return RedirectToAction("Index");
-        //      }
+            return View(item);
+        }
+        #endregion
+
+        #region get delete
+        [HttpGet]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (id == 0)
+            {
+                return NotFound();
+            }
+            var item = await CategoryRepo.GetCategoryById(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            return View(item);
+        }
+        #endregion
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteRecord(int id)
+        {
+            try
+            {
+                if (id == 0)
+                {
+                    return BadRequest();
+                }
+                else
+                {
+                    bool status = await CategoryRepo.DeleteRecord(id);
+                    if (status)
+                    {
+                        TempData["userSuccess"] = "Record successfully deleted";
+                    }
+                    else
+                    {
+                        TempData["userError"] = "Record not delete";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+            return RedirectToAction("Index");
+        }
     }
 }

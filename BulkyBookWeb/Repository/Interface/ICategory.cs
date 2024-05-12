@@ -7,8 +7,7 @@ namespace BulkyBookWeb.Repository.Interface
         Task<Category> GetCategoryById(int id);
         Task<IEnumerable<Category>> GetCategory();
         Task<int> AddCategory(Category category);
-        Task<Category> GetDetails(int id);
         Task<bool> UpdateRecord(Category category);
-        //Task<bool> DeleteRecord(int id);
+        Task<bool> DeleteRecord(int id);
     }
 }
