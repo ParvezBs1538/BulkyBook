@@ -8,49 +8,26 @@ namespace BulkyBookWeb.Controllers
 {
     public class CategoryController : Controller
     {
-        private readonly ICategory CategoryRepo;
-        public CategoryController(ICategory CategoryRepo)
+        private readonly ICategory<Category> category;
+        public CategoryController(ICategory<Category> category)
         {
-            this.CategoryRepo = CategoryRepo;
+            this.category = category;
         }
 
-        #region repo index
+        #region View all data
         public async Task<IActionResult> Index(string search)
         {
-            var data = await CategoryRepo.GetCategory();
+            IEnumerable<Category> data = await category.GetCategory();
             if (!string.IsNullOrEmpty(search))
             {
-                //data = data.Where(x => x.Name == search).OrderBy(x => x.DisplayOrder).ToList();
-                data = data.Where(x => x.Name.Contains(search)).OrderBy(x => x.DisplayOrder).ToList();
+                //data = data.Where(x => x.Name == search).OrderBy(x => x.DisplayOrder).ToList(); // search by exact name
+                data = data.Where(x => x.Name.Contains(search)).OrderBy(x => x.DisplayOrder).ToList(); // search by any character
             }
             return View(data);
         }
         #endregion
 
-        #region search by name
-        //public IActionResult Index(string search)
-        //{
-        //    var item = context.Categories.OrderBy(x => x.DisplayOrder).ToList();
-
-        //    if (!string.IsNullOrEmpty(search))
-        //    {
-        //        item = item.Where(c => c.Name.Contains(search)).OrderBy(x => x.DisplayOrder).ToList();
-        //    }
-
-        //    return View(item);
-        //}
-        #endregion
-
-
-        //public IActionResult Index()
-        //{
-        //    var item = context.Categories.ToList();
-        //    IEnumerable<Category> item = context.Categories.OrderBy(x => x.DisplayOrder).ToList();  // IEnumerable-> represents a sequence of elements
-
-        //    return View(item);
-        //}
-
-        #region get create
+        #region Get create
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -58,83 +35,111 @@ namespace BulkyBookWeb.Controllers
         }
         #endregion
 
-        #region post create
+        #region Post create
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Category category)
+        public async Task<IActionResult> Create(Category obj)
         {
-            if (category.Name == category.DisplayOrder.ToString())
+            if (obj.Name == obj.DisplayOrder.ToString())
             {
                 ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
             }
+
             if (ModelState.IsValid)
 			{
-                await CategoryRepo.AddCategory(category);
+                await category.AddCategory(obj);
                 TempData["success"] = "Category created successfully";
+
                 return RedirectToAction("Index");
             }
 
-			return View(category);
+			return View(obj);
 		}
         #endregion
 
-        #region get edit
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        #region Get delete
+        //GET
+        public async Task<IActionResult> Delete(int id)
         {
-            Category category = new Category();
-            try
+            Category categoryObj = new Category();
+
+            if (id == 0)
             {
-                if (id == 0)
-                {
-                    return BadRequest();
-                }
-                else
-                {
-                    category = await CategoryRepo.GetCategoryById(id);
-                    if (category == null)
-                    {
-                        return NotFound();
-                    }
-                }
+                return BadRequest();
             }
-            catch (Exception ex)
+
+            categoryObj = await category.DeleteCategoryGet(id);
+
+            if (category == null)
             {
-                throw;
+                return NotFound();
             }
+
+            return View(categoryObj);
+        }
+        #endregion
+
+        #region Delete Post
+        [HttpPost]
+        public async Task<IActionResult> Delete(Category categoryObj)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                bool status = await category.DeleteCategoryPost(categoryObj);
+                if (status == false)
+                {
+                    TempData["error"] = "Deleted Performed Unsuccessfully";
+                }
+
+                return RedirectToAction("Index");
+            }
+
             return View(category);
         }
         #endregion
 
-        #region post edit
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Category category)
+        #region Edit get
+        public async Task<IActionResult> Edit(int id)
         {
-            if (category.Name == category.DisplayOrder.ToString())
+            Category categoryObj = new Category();
+
+            if (id == 0)
             {
-                ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
+                return BadRequest();
             }
-            try
+            else
             {
-                if (!ModelState.IsValid)
+                categoryObj = await category.EditCategory(id);
+                if (category == null)
                 {
-                    return View(category);
+                    return NotFound();
+                }
+            }
+            return View(categoryObj);
+        }
+        #endregion
+
+        #region Edit Post
+        [HttpPost]
+        public async Task<IActionResult> Edit(Category obj)
+        {
+            if (ModelState.IsValid)
+            {
+                bool data = await category.UpdateCategory(obj);
+                if (data == true)
+                {
+                    TempData["success"] = "Edited successfully Updated";
                 }
                 else
                 {
-                    bool status = await CategoryRepo.UpdateRecord(category);
-                    if (status)
-                    {
-                        TempData["success"] = "Category Updated successfully";
-                    }
+                    TempData["error"] = "Category not Updated";
                 }
+                return RedirectToAction("Index");
             }
-            catch (Exception)
-            {
-                throw;
-            }
-            return RedirectToAction("Index");
+
+            return View(obj);
         }
         #endregion
 
@@ -145,59 +150,10 @@ namespace BulkyBookWeb.Controllers
             {
                 return NotFound();
             }
-            var item = await CategoryRepo.GetCategoryById(id);
+            var item = await category.GetDetails(id);
 
             return View(item);
         }
         #endregion
-
-        #region get delete
-        [HttpGet]
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (id == 0)
-            {
-                return NotFound();
-            }
-            var item = await CategoryRepo.GetCategoryById(id);
-            if (item == null)
-            {
-                return NotFound();
-            }
-
-            return View(item);
-        }
-        #endregion
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteRecord(int id)
-        {
-            try
-            {
-                if (id == 0)
-                {
-                    return BadRequest();
-                }
-                else
-                {
-                    bool status = await CategoryRepo.DeleteRecord(id);
-                    if (status)
-                    {
-                        TempData["userSuccess"] = "Record successfully deleted";
-                    }
-                    else
-                    {
-                        TempData["userError"] = "Record not delete";
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-
-            return RedirectToAction("Index");
-        }
     }
 }

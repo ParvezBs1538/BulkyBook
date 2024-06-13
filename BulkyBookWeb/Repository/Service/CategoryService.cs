@@ -1,72 +1,108 @@
 ﻿using BulkyBookWeb.Data;
-using BulkyBookWeb.Models;
 using BulkyBookWeb.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
 
 namespace BulkyBookWeb.Repository.Service
 {
-    public class CategoryService : ICategory
+    public class CategoryService<T> : ICategory<T> where T : class
     {
         private readonly ApplicationDbContext context;
+        DbSet<T> dbSet;
         public CategoryService(ApplicationDbContext context)
         {
             this.context = context;
+            dbSet = context.Set<T>();
         }
 
-        #region GetCategoryById
-        public async Task<Category> GetCategoryById(int id)
+        #region GetByID
+        public async Task<T> GetCategoryById(T id)
         {
-            var data = await context.Categories.FindAsync(id);
-            return data;
+            var category = await dbSet.FindAsync(id);
+
+            return category;
         }
         #endregion
 
-        #region GetCategory
-        public async Task<IEnumerable<Category>> GetCategory()
+        #region GetAllData
+        public async Task<IEnumerable<T>> GetCategory()
         {
-            var data = await context.Categories.OrderBy(x => x.DisplayOrder).ToListAsync();
+            IEnumerable<T> data = await dbSet.ToListAsync();
+
             return data;
         }
         #endregion
 
         #region AddCategory
-        public async Task<int> AddCategory(Category category)
+        public async Task<T> AddCategory(T category)
         {
-            await context.Categories.AddAsync(category);
+            await dbSet.AddAsync(category);
             await context.SaveChangesAsync();
-            return category.Id;
+
+            return category;
         }
         #endregion
 
-
-        #region UpdateRecord
-        public async Task<bool> UpdateRecord(Category category)
+        #region DeleteCategoryGet
+        public async Task<T> DeleteCategoryGet(int id)
         {
-            bool status = false;
+            var data = await dbSet.FindAsync(id);
+
+            return data;
+        }
+        #endregion
+
+        #region DeleteCategoryPost
+        public async Task<bool> DeleteCategoryPost(T category)
+        {
+            var status = false;
+
             if (category != null)
             {
-                context.Categories.Update(category);
+                dbSet.Remove(category);
                 await context.SaveChangesAsync();
                 status = true;
             }
+
             return status;
         }
         #endregion
 
-        public async Task<bool> DeleteRecord(int id)
+        #region EditCategory
+
+        public async Task<T> EditCategory(int id)
+        {
+            var data = await dbSet.FindAsync(id);
+
+            return data;
+        }
+
+        #endregion
+
+        #region UpdateCategory
+        public async Task<bool> UpdateCategory(T category)
         {
             bool status = false;
-            if (id != 0)
+
+            if (category != null)
             {
-                var data = await GetCategoryById(id);
-                if (data != null)
-                {
-                    context.Categories.Remove(data);
-                    await context.SaveChangesAsync();
-                    status = true;
-                }
+                context.Update(category);
+                await context.SaveChangesAsync();
+                status = true;
             }
+
             return status;
         }
+
+        #endregion
+
+        #region GetDetails
+
+        public async Task<T> GetDetails(int id)
+        {
+            var data = await dbSet.FindAsync(id);
+
+            return data;
+        }
+        #endregion
     }
 }

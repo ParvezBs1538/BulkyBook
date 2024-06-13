@@ -1,5 +1,6 @@
 
 using BulkyBookWeb.Data;
+using BulkyBookWeb.Models;
 using BulkyBookWeb.Repository.Interface;
 using BulkyBookWeb.Repository.Service;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
     builder.Configuration.GetConnectionString("DefaultConnection")
 ));
 
-builder.Services.AddScoped<ICategory, CategoryService>();
+builder.Services.AddScoped<ICategory<Category>, CategoryService<Category>>();
 
 //ilder.Services.AddRazorPages().AddRazorRuntimeCompilation();
 
