@@ -17,7 +17,6 @@ namespace BulkyBookWeb.Controllers
         #region View all data
         public async Task<IActionResult> Index(string search)
         {
-            //var data = await CategoryRepo.GetCategory();
             IEnumerable<Category> data = await category.GetCategory();
             if (!string.IsNullOrEmpty(search))
             {
@@ -28,7 +27,7 @@ namespace BulkyBookWeb.Controllers
         }
         #endregion
 
-        #region get create
+        #region Get create
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -36,7 +35,7 @@ namespace BulkyBookWeb.Controllers
         }
         #endregion
 
-        #region post create
+        #region Post create
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -46,6 +45,7 @@ namespace BulkyBookWeb.Controllers
             {
                 ModelState.AddModelError("name", "The DisplayOrder cannot exactly match the Name.");
             }
+
             if (ModelState.IsValid)
 			{
                 await category.AddCategory(obj);
@@ -58,7 +58,7 @@ namespace BulkyBookWeb.Controllers
 		}
         #endregion
 
-        #region get delete
+        #region Get delete
         //GET
         public async Task<IActionResult> Delete(int id)
         {
@@ -78,8 +78,9 @@ namespace BulkyBookWeb.Controllers
 
             return View(categoryObj);
         }
+        #endregion
 
-        //POST
+        #region Delete Post
         [HttpPost]
         public async Task<IActionResult> Delete(Category categoryObj)
         {
@@ -91,10 +92,6 @@ namespace BulkyBookWeb.Controllers
                 {
                     TempData["error"] = "Deleted Performed Unsuccessfully";
                 }
-                else
-                {
-                    TempData["success"] = "Deleted successfully";
-                }
 
                 return RedirectToAction("Index");
             }
@@ -103,8 +100,7 @@ namespace BulkyBookWeb.Controllers
         }
         #endregion
 
-
-        //GET
+        #region Edit get
         public async Task<IActionResult> Edit(int id)
         {
             Category categoryObj = new Category();
@@ -123,8 +119,9 @@ namespace BulkyBookWeb.Controllers
             }
             return View(categoryObj);
         }
+        #endregion
 
-        //POST
+        #region Edit Post
         [HttpPost]
         public async Task<IActionResult> Edit(Category obj)
         {
@@ -144,6 +141,7 @@ namespace BulkyBookWeb.Controllers
 
             return View(obj);
         }
+        #endregion
 
         #region details
         public async Task<IActionResult> Details(int id)
